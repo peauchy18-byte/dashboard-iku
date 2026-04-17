@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Capaian IKU - Universitas Andalas</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 16px; }
+  .w { max-width: 900px; margin: 0 auto; }
+
+  /* HEADER */
+  .header {
+    background: #1a5e1a;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .hlogo {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: rgba(255,255,255,.2);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 13px; font-weight: 700; flex-shrink: 0;
+  }
+  .htitle { color: #fff; font-size: 15px; font-weight: 700; line-height: 1.3; }
+  .hsub { color: rgba(255,255,255,.75); font-size: 12px; margin-top: 2px; }
+
+  /* IKU TABS */
+  .iku-tabs {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 5px;
+    margin-bottom: 14px;
+  }
+  @media(min-width: 480px) {
+    .iku-tabs { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+  }
+  .itab {
+    border-radius: 8px;
+    padding: 8px 4px;
+    cursor: pointer;
+    text-align: center;
+    border: 1px solid #ddd;
+    background: #f9f9f9;
+    transition: all .15s;
+  }
+  .itab:hover { border-color: #aaa; background: #fff; }
+  .itab.active { background: #1a5e1a; border-color: #1a5e1a; }
+  .itab .tn { font-size: 12px; font-weight: 700; color: #333; }
+  .itab.active .tn { color: #fff; }
+  .itab .tdot { width: 7px; height: 7px; border-radius: 50%; margin: 3px auto 0; }
+
+  /* VERDICT BANNER */
+  .banner {
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .b-up   { background: #eaf3de; border-left: 4px solid #2d6e0f; }
+  .b-down { background: #fdecea; border-left: 4px solid #9b2c2c; }
+  .b-mix  { background: #fef3e2; border-left: 4px solid #b8860b; }
+  .b-icon { font-size: 22px; flex-shrink: 0; line-height: 1.2; }
+  .b-title { font-size: 13px; font-weight: 700; color: #222; }
+  .b-desc  { font-size: 12px; color: #555; margin-top: 3px; line-height: 1.5; }
+
+  /* METRIC CARDS */
+  .mcards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+    margin-bottom: 14px;
+  }
+  @media(min-width: 480px) {
+    .mcards { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  }
+  .mc { border-radius: 8px; padding: 10px 12px; }
+  .mc-l { font-size: 11px; margin-bottom: 3px; }
+  .mc-v { font-size: 22px; font-weight: 700; }
+  .mc-s { font-size: 10px; margin-top: 2px; opacity: .8; }
+  .mc-blue  { background: #dbeafe; } .mc-blue  .mc-l, .mc-blue  .mc-v, .mc-blue  .mc-s { color: #1e40af; }
+  .mc-green { background: #dcfce7; } .mc-green .mc-l, .mc-green .mc-v, .mc-green .mc-s { color: #166534; }
+  .mc-amber { background: #fef9c3; } .mc-amber .mc-l, .mc-amber .mc-v, .mc-amber .mc-s { color: #854d0e; }
+  .mc-red   { background: #fee2e2; } .mc-red   .mc-l, .mc-red   .mc-v, .mc-red   .mc-s { color: #991b1b; }
+
+  /* CHART CARD */
+  .chart-card {
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+  }
+  .ch-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .ch-name { font-size: 13px; font-weight: 700; color: #222; flex: 1; min-width: 0; }
+  .leg { display: flex; gap: 12px; flex-shrink: 0; }
+  .li  { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #666; }
+  .ll  { width: 20px; height: 2.5px; border-radius: 2px; }
+  .chart-wrap { position: relative; width: 100%; height: 220px; }
+
+  /* BOTTOM PANELS */
+  .bottom {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  @media(min-width: 520px) {
+    .bottom { grid-template-columns: 1fr 1fr; }
+  }
+  .bc {
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 12px;
+    padding: 14px 16px;
+  }
+  .bc-hd {
+    font-size: 11px; font-weight: 700; color: #888;
+    text-transform: uppercase; letter-spacing: .05em;
+    margin-bottom: 12px;
+  }
+
+  /* YEAR BARS */
+  .yr-item { margin-bottom: 9px; }
+  .yr-top  { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; gap: 4px; }
+  .yr-lbl  { font-size: 12px; color: #555; flex-shrink: 0; }
+  .yr-status { font-size: 10px; }
+  .yr-right  { display: flex; align-items: center; gap: 5px; font-size: 12px; flex-shrink: 0; }
+  .bar-bg  { height: 17px; border-radius: 20px; background: #f0f0f0; overflow: hidden; }
+  .bar-in  {
+    height: 100%; border-radius: 20px;
+    display: flex; align-items: center; padding: 0 7px;
+    transition: width .5s ease;
+  }
+  .bar-in span { font-size: 10px; font-weight: 700; color: #fff; white-space: nowrap; }
+
+  /* DELTA ROWS */
+  .ditem {
+    display: flex; align-items: center;
+    padding: 7px 0;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .ditem:last-child { border-bottom: none; }
+  .darrow {
+    width: 26px; height: 26px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; flex-shrink: 0; margin-right: 8px;
+  }
+  .da-up   { background: #dcfce7; color: #166534; }
+  .da-down { background: #fee2e2; color: #991b1b; }
+  .da-flat { background: #f3f4f6; color: #6b7280; }
+  .d-lbl { font-size: 12px; color: #666; flex: 1; }
+  .d-val { font-size: 13px; font-weight: 700; }
+  .up   { color: #166534; }
+  .down { color: #991b1b; }
+  .flat { color: #6b7280; }
+
+  /* FOOTER */
+  .footer {
+    text-align: center;
+    font-size: 11px;
+    color: #999;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid #eee;
+  }
+</style>
+</head>
+<body>
+<div class="w">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="hlogo">U</div>
+    <div>
+      <div class="htitle">Dashboard Capaian IKU — Universitas Andalas</div>
+      <div class="hsub">Direktorat Perencanaan dan Pengembangan &nbsp;·&nbsp; Tahun 2021 s.d 2024</div>
+    </div>
+  </div>
+
+  <!-- IKU SELECTOR -->
+  <div class="iku-tabs" id="tabs"></div>
+
+  <!-- VERDICT BANNER -->
+  <div class="banner" id="banner"></div>
+
+  <!-- METRIC CARDS -->
+  <div class="mcards" id="mcards"></div>
+
+  <!-- CHART -->
+  <div class="chart-card">
+    <div class="ch-head">
+      <div class="ch-name" id="chName">-</div>
+      <div class="leg">
+        <div class="li"><div class="ll" style="background:#2563eb"></div>Capaian</div>
+        <div class="li"><div class="ll" style="border-top:2px dashed #f97316;background:none"></div>Target</div>
+      </div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="mainChart" role="img" aria-label="Grafik capaian dan target IKU Universitas Andalas 2021-2024"></canvas>
+    </div>
+  </div>
+
+  <!-- BOTTOM PANELS -->
+  <div class="bottom">
+    <div class="bc">
+      <div class="bc-hd">Capaian tiap tahun</div>
+      <div id="yrRows"></div>
+    </div>
+    <div class="bc">
+      <div class="bc-hd">Perubahan antar tahun</div>
+      <div id="dRows"></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Direktorat Perencanaan dan Pengembangan &nbsp;·&nbsp; Universitas Andalas &nbsp;·&nbsp; ditrenbang.unand.ac.id
+  </div>
+
+</div>
+
+<script>
+const DATA = [
+  { id:1, name:"Lulusan mendapat pekerjaan layak",        unit:"%",     c:[10.75,52.27,66.68,60.80], t:[80,60,80,80]    },
+  { id:2, name:"Mahasiswa berprestasi",                   unit:"%",     c:[1.33, 18.92,4.22, 8.35],  t:[30,25,40,40]    },
+  { id:3, name:"Dosen berkegiatan luar kampus",           unit:"%",     c:[7.72, 20.49,40.60,59.85], t:[20,30,30,32.1]  },
+  { id:4, name:"Praktisi mengajar",                       unit:"%",     c:[38.35,49.91,5.09, 6.60],  t:[40,50,25,25]    },
+  { id:5, name:"Hasil kerja dosen digunakan masyarakat",  unit:"hasil", c:[2.76, 7.60, 7.26, 4.81],  t:[0.5,1,1,6]      },
+  { id:6, name:"Prodi terakreditasi internasional",       unit:"prodi", c:[0.35, 0.92, 0.95, 2.00],  t:[0.5,0.5,0.7,2.6]},
+  { id:7, name:"Kelas kolaborasi & berwawasan global",    unit:"%",     c:[18.70,29.21,22.00,15.33], t:[35,50,50,58.1]  },
+  { id:8, name:"Prodi siap jadi PTN-BH",                  unit:"%",     c:[34.62,28.00,21.57,33.00], t:[8,5,10,33.33]   },
+];
+const YEARS = ['2021','2022','2023','2024'];
+let activeIdx = 0, chart = null;
+
+function getPct(iku)   { return Math.round((iku.c[3] / iku.t[3]) * 100); }
+function dotColor(iku) { const p=getPct(iku); return p>=90?'#4ade80':p>=60?'#fbbf24':'#f87171'; }
+function arw(v)        { return v>0?{s:'▲',c:'up',dc:'da-up'}:v<0?{s:'▼',c:'down',dc:'da-down'}:{s:'—',c:'flat',dc:'da-flat'}; }
+
+function trendInfo(iku) {
+  const ups = iku.c.filter((v,i) => i>0 && v>iku.c[i-1]).length;
+  const overall = +(iku.c[3]-iku.c[0]).toFixed(2);
+  if (ups>=2 && overall>0)
+    return { cls:'b-up',   icon:'📈', title:`IKU ${iku.id} — Tren Meningkat`,   desc:`Capaian naik dari ${iku.c[0]} menjadi ${iku.c[3]} ${iku.unit} selama 4 tahun (+${overall})` };
+  if (ups<=1 && overall<0)
+    return { cls:'b-down', icon:'📉', title:`IKU ${iku.id} — Tren Menurun`,     desc:`Capaian turun dari ${iku.c[0]} menjadi ${iku.c[3]} ${iku.unit} selama 4 tahun (${overall})` };
+  return   { cls:'b-mix',  icon:'〰️', title:`IKU ${iku.id} — Tren Fluktuatif`, desc:`Capaian bergerak naik-turun, posisi 2024: ${iku.c[3]} ${iku.unit}` };
+}
+
+function pctClass(p) { return p>=90?'mc-green':p>=60?'mc-amber':'mc-red'; }
+function pctLabel(p) { return p>=90?'Tercapai ✓':p>=60?'Mendekati target':'Di bawah target'; }
+
+function buildTabs() {
+  const el = document.getElementById('tabs');
+  el.innerHTML = '';
+  DATA.forEach((iku, i) => {
+    const d = document.createElement('div');
+    d.className = 'itab' + (i===activeIdx ? ' active' : '');
+    d.innerHTML = `<div class="tn">IKU ${iku.id}</div>
+      <div class="tdot" style="background:${i===activeIdx?'rgba(255,255,255,.6)':dotColor(iku)}"></div>`;
+    d.onclick = () => { activeIdx=i; buildTabs(); render(); };
+    el.appendChild(d);
+  });
+}
+
+function render() {
+  const iku = DATA[activeIdx];
+  const tr  = trendInfo(iku);
+  const p   = getPct(iku);
+  const maxV = Math.max(...iku.c) * 1.1 || 1;
+
+  // Banner
+  document.getElementById('banner').className = 'banner ' + tr.cls;
+  document.getElementById('banner').innerHTML =
+    `<div class="b-icon">${tr.icon}</div>
+     <div><div class="b-title">${tr.title}</div><div class="b-desc">${tr.desc}</div></div>`;
+
+  // Metric cards
+  document.getElementById('mcards').innerHTML = `
+    <div class="mc mc-blue"><div class="mc-l">Capaian 2021</div><div class="mc-v">${iku.c[0]}</div><div class="mc-s">${iku.unit}</div></div>
+    <div class="mc mc-blue"><div class="mc-l">Capaian 2024</div><div class="mc-v">${iku.c[3]}</div><div class="mc-s">${iku.unit}</div></div>
+    <div class="mc mc-blue"><div class="mc-l">Target 2024</div><div class="mc-v">${iku.t[3]}</div><div class="mc-s">${iku.unit}</div></div>
+    <div class="mc ${pctClass(p)}"><div class="mc-l">Realisasi vs Target</div><div class="mc-v">${p}%</div><div class="mc-s">${pctLabel(p)}</div></div>
+  `;
+
+  // Chart
+  document.getElementById('chName').textContent = `IKU ${iku.id} — ${iku.name} (${iku.unit})`;
+  if (chart) chart.destroy();
+  chart = new Chart(document.getElementById('mainChart'), {
+    type: 'line',
+    data: {
+      labels: YEARS,
+      datasets: [
+        { label:'Capaian', data:iku.c, borderColor:'#2563eb', backgroundColor:'rgba(37,99,235,0.07)',
+          borderWidth:2.5, pointBackgroundColor:'#2563eb', pointRadius:5, pointHoverRadius:7, fill:true, tension:0.35 },
+        { label:'Target',  data:iku.t, borderColor:'#f97316', backgroundColor:'transparent',
+          borderWidth:2, borderDash:[5,4], pointStyle:'triangle', pointBackgroundColor:'#f97316', pointRadius:5, fill:false, tension:0.35 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${c.parsed.y} ${iku.unit}` } }
+      },
+      scales: {
+        x: { grid: { color:'rgba(0,0,0,0.06)' }, ticks: { font: { size:12 } } },
+        y: { grid: { color:'rgba(0,0,0,0.06)' }, ticks: { font: { size:11 }, callback: v => v + ' ' + iku.unit } }
+      }
+    }
+  });
+
+  // Year rows
+  const yrEl = document.getElementById('yrRows');
+  yrEl.innerHTML = '';
+  iku.c.forEach((v, i) => {
+    const pBar = Math.round((v / maxV) * 100) || 2;
+    const hit  = v >= iku.t[i];
+    const delta = i===0 ? null : v - iku.c[i-1];
+    const a = delta===null ? {s:'',c:'flat'} : arw(delta);
+    yrEl.innerHTML += `
+      <div class="yr-item">
+        <div class="yr-top">
+          <span class="yr-lbl">${YEARS[i]}</span>
+          <span class="yr-status" style="color:${hit?'#166534':'#991b1b'}">${hit?'✓ capai target':'✗ belum target'}</span>
+          <div class="yr-right">
+            <span class="${a.c}">${a.s} ${delta===null?'—':(delta>0?'+':'')+delta.toFixed(2)}</span>
+            <span style="font-weight:700">${v}</span>
+          </div>
+        </div>
+        <div class="bar-bg">
+          <div class="bar-in" style="width:${pBar}%;background:${hit?'#16a34a':'#2563eb'}">
+            <span>${v}</span>
+          </div>
+        </div>
+      </div>`;
+  });
+
+  // Delta rows
+  const dEl = document.getElementById('dRows');
+  dEl.innerHTML = '';
+  [{l:'2021 → 2022', v:iku.c[1]-iku.c[0]},
+   {l:'2022 → 2023', v:iku.c[2]-iku.c[1]},
+   {l:'2023 → 2024', v:iku.c[3]-iku.c[2]}].forEach(d => {
+    const a = arw(d.v);
+    dEl.innerHTML += `
+      <div class="ditem">
+        <div class="darrow ${a.dc}">${a.s}</div>
+        <div class="d-lbl">${d.l}</div>
+        <div class="d-val ${a.c}">${(d.v>0?'+':'')+d.v.toFixed(2)} ${iku.unit}</div>
+      </div>`;
+  });
+}
+
+buildTabs();
+render();
+</script>
+</body>
+</html>
