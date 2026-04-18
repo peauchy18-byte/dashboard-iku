@@ -252,5 +252,12 @@ function render() {
 buildTabs();
 render();
 </script>
+ <script>
+  function sendHeight() {
+    window.parent.postMessage({ height: document.body.scrollHeight }, '*');
+  }
+  window.addEventListener('load', sendHeight);
+  window.addEventListener('resize', sendHeight);
+</script>
 </body>
 </html>
