@@ -3,241 +3,247 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Capaian IKU - Universitas Andalas</title>
+<title>Dashboard Capaian IKU - Universitas Andalas</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Segoe UI', Arial, sans-serif; background: #fff; }
+  body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 10px; }
+  .w { max-width: 100%; margin: 0 auto; }
 
   /* HEADER */
   .header {
     background: #1a5e1a;
-    padding: 10px 16px;
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 10px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 10px;
   }
-  .htitle { color: #fff; font-size: 13px; font-weight: 700; }
-  .hsub   { color: rgba(255,255,255,.65); font-size: 10px; margin-top: 2px; }
-  .htag   { background: rgba(255,255,255,.18); color: #fff; font-size: 10px; padding: 3px 10px; border-radius: 20px; }
+  .hlogo {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: rgba(255,255,255,.2);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 12px; font-weight: 700; flex-shrink: 0;
+  }
+  .htitle { color: #fff; font-size: 13px; font-weight: 700; line-height: 1.3; }
+  .hsub { color: rgba(255,255,255,.75); font-size: 11px; margin-top: 2px; }
 
-  /* TABS */
-  .tabs {
-    display: flex;
-    border-bottom: 2px solid #e8e8e8;
-    background: #f9f9f9;
-    overflow-x: auto;
-    scrollbar-width: none;
+  /* IKU TABS */
+  .iku-tabs {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px;
+    margin-bottom: 10px;
   }
-  .tabs::-webkit-scrollbar { display: none; }
-  .tab {
-    flex: 1;
-    min-width: 60px;
-    padding: 9px 4px 7px;
-    text-align: center;
+  @media(min-width: 400px) {
+    .iku-tabs { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+  }
+  .itab {
+    border-radius: 7px;
+    padding: 6px 3px;
     cursor: pointer;
-    border-bottom: 3px solid transparent;
-    transition: all .15s;
-    position: relative;
-    bottom: -2px;
-  }
-  .tab:hover { background: #f0f0f0; }
-  .tab.active { border-bottom: 3px solid #1a5e1a; background: #fff; }
-  .tab .tn { font-size: 11px; font-weight: 700; color: #555; }
-  .tab.active .tn { color: #1a5e1a; }
-  .tab .dot { width: 6px; height: 6px; border-radius: 50%; margin: 3px auto 0; }
-
-  /* CONTENT */
-  .content { padding: 14px 16px 12px; }
-
-  /* IKU TITLE ROW */
-  .iku-title {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 12px;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-  .iku-name { font-size: 13px; font-weight: 700; color: #1a5e1a; }
-  .badge {
-    font-size: 10px; font-weight: 700;
-    padding: 3px 10px; border-radius: 20px;
-  }
-  .badge-green { background: #e3f9e5; color: #166534; }
-  .badge-amber { background: #fffbeb; color: #92400e; }
-  .badge-red   { background: #fff1f2; color: #9f1239; }
-
-  /* STAT PILLS - ringkas */
-  .stats {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 14px;
-    flex-wrap: wrap;
-  }
-  .stat {
-    flex: 1;
-    min-width: 70px;
-    background: #f5f5f5;
-    border-radius: 8px;
-    padding: 7px 10px;
     text-align: center;
+    border: 1px solid #ddd;
+    background: #f9f9f9;
+    transition: all .15s;
   }
-  .stat-label { font-size: 9px; color: #999; margin-bottom: 2px; }
-  .stat-val   { font-size: 16px; font-weight: 700; color: #222; line-height: 1; }
-  .stat-unit  { font-size: 9px; color: #bbb; }
-  .stat.hi    { background: #e3f9e5; }
-  .stat.hi .stat-val { color: #166534; }
-  .stat.lo    { background: #fff1f2; }
-  .stat.lo .stat-val { color: #9f1239; }
+  .itab:hover { border-color: #aaa; background: #fff; }
+  .itab.active { background: #1a5e1a; border-color: #1a5e1a; }
+  .itab .tn { font-size: 11px; font-weight: 700; color: #333; }
+  .itab.active .tn { color: #fff; }
+  .itab .tdot { width: 6px; height: 6px; border-radius: 50%; margin: 3px auto 0; }
 
-  /* CHART */
-  .chart-wrap { position: relative; width: 100%; height: 200px; }
+  /* VERDICT BANNER */
+  .banner {
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .b-up   { background: #eaf3de; border-left: 4px solid #2d6e0f; }
+  .b-down { background: #fdecea; border-left: 4px solid #9b2c2c; }
+  .b-mix  { background: #fef3e2; border-left: 4px solid #b8860b; }
+  .b-icon { font-size: 18px; flex-shrink: 0; line-height: 1.2; }
+  .b-title { font-size: 12px; font-weight: 700; color: #222; }
+  .b-desc  { font-size: 11px; color: #555; margin-top: 2px; line-height: 1.4; }
+
+  /* METRIC CARDS */
+  .mcards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  @media(min-width: 400px) {
+    .mcards { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  }
+  .mc { border-radius: 7px; padding: 8px 10px; }
+  .mc-l { font-size: 10px; margin-bottom: 2px; }
+  .mc-v { font-size: 18px; font-weight: 700; }
+  .mc-s { font-size: 10px; margin-top: 1px; opacity: .8; }
+  .mc-blue  { background: #dbeafe; } .mc-blue  .mc-l, .mc-blue  .mc-v, .mc-blue  .mc-s { color: #1e40af; }
+  .mc-green { background: #dcfce7; } .mc-green .mc-l, .mc-green .mc-v, .mc-green .mc-s { color: #166534; }
+  .mc-amber { background: #fef9c3; } .mc-amber .mc-l, .mc-amber .mc-v, .mc-amber .mc-s { color: #854d0e; }
+  .mc-red   { background: #fee2e2; } .mc-red   .mc-l, .mc-red   .mc-v, .mc-red   .mc-s { color: #991b1b; }
+
+  /* CHART CARD */
+  .chart-card {
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+  }
+  .ch-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .ch-name { font-size: 12px; font-weight: 700; color: #222; flex: 1; min-width: 0; }
+  .leg { display: flex; gap: 10px; flex-shrink: 0; }
+  .li  { display: flex; align-items: center; gap: 4px; font-size: 10px; color: #666; }
+  .ll  { width: 16px; height: 2px; border-radius: 2px; }
+  .chart-wrap { position: relative; width: 100%; height: 220px; }
 
   /* FOOTER */
   .footer {
-    text-align: center; font-size: 10px; color: #ccc;
-    padding: 8px; border-top: 1px solid #f0f0f0;
+    text-align: center;
+    font-size: 10px;
+    color: #999;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
   }
 </style>
 </head>
 <body>
+<div class="w">
 
-<div class="header">
-  <div>
-    <div class="htitle">Capaian IKU — Universitas Andalas</div>
-    <div class="hsub">Direktorat Perencanaan dan Pengembangan</div>
+  <!-- HEADER -->
+  <div class="header">
+    <div class="hlogo">U</div>
+    <div>
+      <div class="htitle">Dashboard Capaian IKU — Universitas Andalas</div>
+      <div class="hsub">Direktorat Perencanaan dan Pengembangan &nbsp;·&nbsp; Tahun 2021 s.d 2024</div>
+    </div>
   </div>
-  <div class="htag">2021–2024</div>
+
+  <!-- IKU TABS -->
+  <div class="iku-tabs" id="tabs"></div>
+
+  <!-- VERDICT BANNER -->
+  <div class="banner" id="banner"></div>
+
+  <!-- METRIC CARDS -->
+  <div class="mcards" id="mcards"></div>
+
+  <!-- CHART -->
+  <div class="chart-card">
+    <div class="ch-head">
+      <div class="ch-name" id="chName">-</div>
+      <div class="leg">
+        <div class="li"><div class="ll" style="background:#2563eb"></div>Capaian</div>
+        <div class="li"><div class="ll" style="border-top:2px dashed #f97316;background:none"></div>Target</div>
+      </div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="mainChart"></canvas>
+    </div>
+  </div>
+
+  <div class="footer">
+    Direktorat Perencanaan dan Pengembangan &nbsp;·&nbsp; Universitas Andalas &nbsp;·&nbsp; ditrenbang.unand.ac.id
+  </div>
+
 </div>
-
-<div class="tabs" id="tabs"></div>
-
-<div class="content">
-  <div class="iku-title">
-    <div class="iku-name" id="ikuName">-</div>
-    <span class="badge" id="ikuBadge">-</span>
-  </div>
-  <div class="stats" id="stats"></div>
-  <div class="chart-wrap">
-    <canvas id="chart"></canvas>
-  </div>
-</div>
-
-<div class="footer">ditrenbang.unand.ac.id · Universitas Andalas</div>
-
 <script>
 const DATA = [
-  { id:1, name:"Lulusan mendapat pekerjaan layak",       unit:"%",     c:[10.75,52.27,66.68,60.80], t:[80,60,80,80]     },
-  { id:2, name:"Mahasiswa berprestasi",                  unit:"%",     c:[1.33, 18.92,4.22, 8.35],  t:[30,25,40,40]     },
-  { id:3, name:"Dosen berkegiatan luar kampus",          unit:"%",     c:[7.72, 20.49,40.60,59.85], t:[20,30,30,32.1]   },
-  { id:4, name:"Praktisi mengajar",                      unit:"%",     c:[38.35,49.91,5.09, 6.60],  t:[40,50,25,25]     },
-  { id:5, name:"Hasil kerja dosen digunakan masyarakat", unit:"hasil", c:[2.76, 7.60, 7.26, 4.81],  t:[0.5,1,1,6]       },
-  { id:6, name:"Prodi terakreditasi internasional",      unit:"prodi", c:[0.35, 0.92, 0.95, 2.00],  t:[0.5,0.5,0.7,2.6] },
-  { id:7, name:"Kelas kolaborasi & berwawasan global",   unit:"%",     c:[18.70,29.21,22.00,15.33], t:[35,50,50,58.1]   },
-  { id:8, name:"Prodi siap jadi PTN-BH",                 unit:"%",     c:[34.62,28.00,21.57,33.00], t:[8,5,10,33.33]    },
+  { id:1, name:"Lulusan mendapat pekerjaan layak",        unit:"%",     c:[10.75,52.27,66.68,60.80], t:[80,60,80,80]    },
+  { id:2, name:"Mahasiswa berprestasi",                   unit:"%",     c:[1.33, 18.92,4.22, 8.35],  t:[30,25,40,40]    },
+  { id:3, name:"Dosen berkegiatan luar kampus",           unit:"%",     c:[7.72, 20.49,40.60,59.85], t:[20,30,30,32.1]  },
+  { id:4, name:"Praktisi mengajar",                       unit:"%",     c:[38.35,49.91,5.09, 6.60],  t:[40,50,25,25]    },
+  { id:5, name:"Hasil kerja dosen digunakan masyarakat",  unit:"hasil", c:[2.76, 7.60, 7.26, 4.81],  t:[0.5,1,1,6]      },
+  { id:6, name:"Prodi terakreditasi internasional",       unit:"prodi", c:[0.35, 0.92, 0.95, 2.00],  t:[0.5,0.5,0.7,2.6]},
+  { id:7, name:"Kelas kolaborasi & berwawasan global",    unit:"%",     c:[18.70,29.21,22.00,15.33], t:[35,50,50,58.1]  },
+  { id:8, name:"Prodi siap jadi PTN-BH",                  unit:"%",     c:[34.62,28.00,21.57,33.00], t:[8,5,10,33.33]   },
 ];
 const YEARS = ['2021','2022','2023','2024'];
-let active = 0, chart = null;
+let activeIdx = 0, chart = null;
 
-function pct(iku) { return Math.round((iku.c[3]/iku.t[3])*100); }
-function dotColor(iku) { const p=pct(iku); return p>=90?'#4ade80':p>=60?'#fbbf24':'#f87171'; }
+function getPct(iku)   { return Math.round((iku.c[3] / iku.t[3]) * 100); }
+function dotColor(iku) { const p=getPct(iku); return p>=90?'#4ade80':p>=60?'#fbbf24':'#f87171'; }
+function arw(v)        { return v>0?{s:'▲',c:'up',dc:'da-up'}:v<0?{s:'▼',c:'down',dc:'da-down'}:{s:'—',c:'flat',dc:'da-flat'}; }
+
+function trendInfo(iku) {
+  const ups = iku.c.filter((v,i) => i>0 && v>iku.c[i-1]).length;
+  const overall = +(iku.c[3]-iku.c[0]).toFixed(2);
+  if (ups>=2 && overall>0)
+    return { cls:'b-up',   icon:'📈', title:`IKU ${iku.id} — Tren Meningkat`,   desc:`Capaian naik dari ${iku.c[0]} menjadi ${iku.c[3]} ${iku.unit} selama 4 tahun (+${overall})` };
+  if (ups<=1 && overall<0)
+    return { cls:'b-down', icon:'📉', title:`IKU ${iku.id} — Tren Menurun`,     desc:`Capaian turun dari ${iku.c[0]} menjadi ${iku.c[3]} ${iku.unit} selama 4 tahun (${overall})` };
+  return   { cls:'b-mix',  icon:'〰️', title:`IKU ${iku.id} — Tren Fluktuatif`, desc:`Capaian bergerak naik-turun, posisi 2024: ${iku.c[3]} ${iku.unit}` };
+}
+
+function pctClass(p) { return p>=90?'mc-green':p>=60?'mc-amber':'mc-red'; }
+function pctLabel(p) { return p>=90?'Tercapai ✓':p>=60?'Mendekati target':'Di bawah target'; }
 
 function buildTabs() {
   const el = document.getElementById('tabs');
   el.innerHTML = '';
   DATA.forEach((iku, i) => {
     const d = document.createElement('div');
-    d.className = 'tab' + (i===active?' active':'');
+    d.className = 'itab' + (i===activeIdx ? ' active' : '');
     d.innerHTML = `<div class="tn">IKU ${iku.id}</div>
-      <div class="dot" style="background:${dotColor(iku)}"></div>`;
-    d.onclick = () => { active=i; buildTabs(); render(); };
+      <div class="tdot" style="background:${i===activeIdx?'rgba(255,255,255,.6)':dotColor(iku)}"></div>`;
+    d.onclick = () => { activeIdx=i; buildTabs(); render(); };
     el.appendChild(d);
   });
 }
 
 function render() {
-  const iku = DATA[active];
-  const p = pct(iku);
+  const iku = DATA[activeIdx];
+  const tr  = trendInfo(iku);
+  const p   = getPct(iku);
 
-  // Badge
-  const badgeCls = p>=90?'badge-green':p>=60?'badge-amber':'badge-red';
-  const badgeTxt = p>=90?'Tercapai ✓':p>=60?'Mendekati target':'Belum tercapai';
-  document.getElementById('ikuName').textContent = `IKU ${iku.id} — ${iku.name}`;
-  const badge = document.getElementById('ikuBadge');
-  badge.className = 'badge ' + badgeCls;
-  badge.textContent = `${p}% · ${badgeTxt}`;
+  document.getElementById('banner').className = 'banner ' + tr.cls;
+  document.getElementById('banner').innerHTML =
+    `<div class="b-icon">${tr.icon}</div>
+     <div><div class="b-title">${tr.title}</div><div class="b-desc">${tr.desc}</div></div>`;
 
-  // Stats ringkas: capaian tiap tahun vs target
-  const statsEl = document.getElementById('stats');
-  statsEl.innerHTML = YEARS.map((y, i) => {
-    const hit = iku.c[i] >= iku.t[i];
-    return `<div class="stat ${hit?'hi':'lo'}">
-      <div class="stat-label">${y}</div>
-      <div class="stat-val">${iku.c[i]}</div>
-      <div class="stat-unit">target: ${iku.t[i]}</div>
-    </div>`;
-  }).join('');
+  document.getElementById('mcards').innerHTML = `
+    <div class="mc mc-blue"><div class="mc-l">Capaian 2021</div><div class="mc-v">${iku.c[0]}</div><div class="mc-s">${iku.unit}</div></div>
+    <div class="mc mc-blue"><div class="mc-l">Capaian 2024</div><div class="mc-v">${iku.c[3]}</div><div class="mc-s">${iku.unit}</div></div>
+    <div class="mc mc-blue"><div class="mc-l">Target 2024</div><div class="mc-v">${iku.t[3]}</div><div class="mc-s">${iku.unit}</div></div>
+    <div class="mc ${pctClass(p)}"><div class="mc-l">Realisasi vs Target</div><div class="mc-v">${p}%</div><div class="mc-s">${pctLabel(p)}</div></div>
+  `;
 
-  // Chart
+  document.getElementById('chName').textContent = `IKU ${iku.id} — ${iku.name} (${iku.unit})`;
   if (chart) chart.destroy();
-  chart = new Chart(document.getElementById('chart'), {
+  chart = new Chart(document.getElementById('mainChart'), {
     type: 'line',
     data: {
       labels: YEARS,
       datasets: [
-        {
-          label: 'Capaian',
-          data: iku.c,
-          borderColor: '#1a5e1a',
-          backgroundColor: 'rgba(26,94,26,0.07)',
-          borderWidth: 2.5,
-          pointBackgroundColor: '#1a5e1a',
-          pointRadius: 5,
-          pointHoverRadius: 7,
-          fill: true,
-          tension: 0.3
-        },
-        {
-          label: 'Target',
-          data: iku.t,
-          borderColor: '#f97316',
-          backgroundColor: 'transparent',
-          borderWidth: 2,
-          borderDash: [5,4],
-          pointBackgroundColor: '#f97316',
-          pointRadius: 4,
-          fill: false,
-          tension: 0.3
-        }
+        { label:'Capaian', data:iku.c, borderColor:'#2563eb', backgroundColor:'rgba(37,99,235,0.07)',
+          borderWidth:2.5, pointBackgroundColor:'#2563eb', pointRadius:4, pointHoverRadius:6, fill:true, tension:0.35 },
+        { label:'Target',  data:iku.t, borderColor:'#f97316', backgroundColor:'transparent',
+          borderWidth:2, borderDash:[5,4], pointStyle:'triangle', pointBackgroundColor:'#f97316', pointRadius:4, fill:false, tension:0.35 }
       ]
     },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
+      responsive: true, maintainAspectRatio: false,
       plugins: {
-        legend: {
-          display: true,
-          position: 'top',
-          align: 'end',
-          labels: { font: { size: 10 }, boxWidth: 20, padding: 8 }
-        },
-        tooltip: {
-          callbacks: {
-            label: c => ` ${c.dataset.label}: ${c.parsed.y} ${iku.unit}`
-          }
-        }
+        legend: { display: false },
+        tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${c.parsed.y} ${iku.unit}` } }
       },
       scales: {
-        x: {
-          grid: { color: 'rgba(0,0,0,0.04)' },
-          ticks: { font: { size: 11 }, color: '#888' }
-        },
-        y: {
-          grid: { color: 'rgba(0,0,0,0.05)' },
-          ticks: { font: { size: 10 }, color: '#aaa', maxTicksLimit: 5,
-            callback: v => v + ' ' + iku.unit }
-        }
+        x: { grid: { color:'rgba(0,0,0,0.06)' }, ticks: { font: { size:11 } } },
+        y: { grid: { color:'rgba(0,0,0,0.06)' }, ticks: { font: { size:10 }, callback: v => v + ' ' + iku.unit } }
       }
     }
   });
